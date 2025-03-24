@@ -23,12 +23,39 @@ jobs:
 
     - name: Configura Docker Compose
       run: |
+        echo "Configurando Docker Compose..."
+        # Removendo a tentativa de remover o docker-compose (pode falhar e não é crítico)
+        # echo "Removendo qualquer instalação anterior..."
+        # sudo rm /usr/local/bin/docker-compose || true # Usando || true para ignorar o erro se o arquivo não existir
+    
+        echo "Baixando Docker Compose versão 1.29.2..."
         curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+        if [ $? -ne 0 ]; then
+          echo "ERRO: Falha ao baixar o Docker Compose."
+          echo "Verifique a conexão com a internet ou a URL do download."
+          exit 1
+        fi
+        echo "Download do Docker Compose concluído com sucesso."
+    
+        echo "Definindo permissão de execução para Docker Compose..."
         sudo chmod +x /usr/local/bin/docker-compose
+        if [ $? -ne 0 ]; then
+          echo "ERRO: Falha ao definir a permissão de execução para o Docker Compose."
+          echo "Verifique as permissões do diretório /usr/local/bin/."
+          exit 1
+        fi
+        echo "Permissão de execução definida com sucesso."
+    
+        echo "Verificando a versão do Docker Compose..."
         docker-compose --version
-
-    - name: Roda Docker Compose
-      run: docker-compose up -d
-
-    - name: Executa testes unitários
-      run: mvn -B verify
+        if [ $? -ne 0 ]; then
+          echo "ERRO: Falha ao verificar a versão do Docker Compose. A instalação pode ter falhado."
+          exit 1
+        fi
+        echo "Docker Compose versão verificada com sucesso."
+    
+        - name: Roda Docker Compose
+          run: docker-compose up -d
+    
+        - name: Executa testes unitários
+          run: mvn -B verify
