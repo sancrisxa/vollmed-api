@@ -1,14 +1,12 @@
-FROM openjdk:17
-
+FROM openjdk:17-jdk-slim AS builder
 WORKDIR /app
-
-COPY mvnw .
+COPY mvnw pom.xml .
 COPY .mvn .mvn
-COPY pom.xml .
+RUN chmod +x mvnw
 COPY src src
+RUN ./mvnw package -DskipTests -Pprod
 
-RUN ./mvnw package -DskipTests
-
-ARG JAR_FILE=target/*.jar
-
-CMD java -jar target/*.jar
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY --from=builder /app/target/*.jar app.jar
+ENTRYPOINT ["java","-jar","app.jar"]
