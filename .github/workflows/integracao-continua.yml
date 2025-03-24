@@ -54,8 +54,8 @@ jobs:
         fi
         echo "Docker Compose versão verificada com sucesso."
     
-        - name: Roda Docker Compose
-          run: docker-compose up -d
-    
-        - name: Executa testes unitários
-          run: mvn -B verify
+    - name: Roda Docker Compose
+      run: docker-compose up -d
+
+    - name: Executa testes unitários
+      run: mvn -B verify
